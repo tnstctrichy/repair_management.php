@@ -15,10 +15,6 @@ function sanitizeInput($input) {
     return htmlspecialchars(stripslashes(trim($input)));
 }
 
-// Initialize success messages
-$successMessageTxt = "";
-$successMessageCsv = "";
-
 // Export to .txt or .csv
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["export_btn"])) {
     $format = $_POST["export"];
@@ -56,8 +52,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["export_btn"])) {
             header('Content-Type: ' . $mime);
             header('Content-Disposition: attachment; filename="' . $filename . '"');
             echo $txtData;
-            
-            $successMessageTxt = "Data exported to $filename";
         } elseif ($format === "csv") {
             // Export to .csv
             $filename = "repair_requests.csv";
@@ -74,15 +68,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["export_btn"])) {
             // Output as a downloadable file
             header('Content-Type: ' . $mime);
             header('Content-Disposition: attachment; filename="' . $filename . '"');
-            
-            $successMessageCsv = "Data exported to $filename";
         }
     } else {
-        $successMessageTxt = "No repair requests found to export.";
-        $successMessageCsv = "No repair requests found to export.";
+        echo "No repair requests found to export.";
     }
+    exit; // Terminate the script after exporting
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -91,11 +84,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["export_btn"])) {
     <title>TNSTC(kum) Ltd., Trichy Region - Export to .txt/.csv</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        .success-message {
-            background-color: yellow;
-            padding: 10px;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
             text-align: center;
-            font-weight: bold;
+        }
+        nav ul {
+            background-color: #333;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+        nav ul li {
+            float: left;
+        }
+        nav ul li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+        nav ul li a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        main {
+            padding: 20px;
+        }
+        h2 {
+            margin-top: 0;
         }
         table {
             border-collapse: collapse;
@@ -108,6 +133,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["export_btn"])) {
         }
         th {
             background-color: #f2f2f2;
+        }
+        .export-form {
+            margin-top: 20px;
+        }
+        .export-form label {
+            font-weight: bold;
+        }
+        .export-form select, .export-form input[type="submit"] {
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -129,21 +163,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["export_btn"])) {
     <main>
         <h2>Export to .txt/.csv</h2>
 
-        <!-- Display success messages -->
-        <?php if (!empty($successMessageTxt)): ?>
-        <div class="success-message">
-            <?php echo $successMessageTxt; ?>
-        </div>
-        <?php endif; ?>
-        
-        <?php if (!empty($successMessageCsv)): ?>
-        <div class="success-message">
-            <?php echo $successMessageCsv; ?>
-        </div>
-        <?php endif; ?>
-
         <!-- Export form -->
-        <form method="POST" action="export_txt.php">
+        <form class="export-form" method="POST" action="export_txt.php">
             <label for="export">Select Format:</label>
             <select name="export" id="export">
                 <option value="txt">Export as .txt</option>
